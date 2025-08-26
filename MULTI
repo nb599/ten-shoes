@@ -1,0 +1,187 @@
+import { notFound } from "next/navigation"
+import ReactMarkdown from "react-markdown"
+import { Calendar, MessageSquareText } from 'lucide-react'
+import { Separator } from "@/components/ui/separator"
+import { SiteHeader } from "@/components/site-header"
+import { getPostBySlug } from "@/posts/posts-index"
+import { CommentSection } from "@/components/comment-section"
+import fs from "node:fs/promises"
+import path from "node:path"
+
+async function getMarkdownFor(slug: string) {
+  try {
+    const filePath = path.join(process.cwd(), "public", "content", `${slug}.md`)
+    const md = await fs.readFile(filePath, "utf8")
+    return md
+  } catch {
+    return null
+  }
+}
+
+export default async function BlogPostPage(props: { params: { slug: string } }) {
+  const { slug } = props.params
+  const meta = getPostBySlug(slug)
+  if (!meta) return notFound()
+  const md = await getMarkdownFor(slug)
+  if (!md) return notFound()
+
+  return (
+    <div className="min-h-screen bg-white">
+      <SiteHeader />
+      <main className="mx-auto max-w-3xl px-4 py-8 md:py-10">
+        <article>
+          <header className="mb-6">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">{meta.title}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>{meta.date}</span>
+              <span>{"·"}</span>
+              <span>{meta.readingTime}</span>
+              <span>{"·"}</span>
+              <div className="flex gap-1 flex-wrap">
+                {meta.tags.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border px-2 py-0.5 bg-muted text-foreground border-[#30363d]/30 text-xs"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </header>
+
+          <Separator className="my-6" />
+
+          <div className="prose prose-neutral max-w-none prose-pre:bg-muted prose-code:text-foreground">
+            <ReactMarkdown>{md}</ReactMarkdown>
+          </div>
+
+          <Separator className="my-8" />
+
+          <section id="comments" className="mt-8">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquareText className="h-5 w-5" />
+              <h2 className="text-lg font-medium">评论</h2>
+            </div>
+            <CommentSection slug={slug} />
+          </section>
+        </article>
+      </main>
+    </div>
+  )
+}
+
+// components/comment-section.tsx
+import { cookies } from "next/headers"
+import { format } from "date-fns"
+import { zhCN } from "date-fns/locale"
+import type { JSX } from "react"
+import { MessageSquarePlus, LogIn, AlertTriangle } from 'lucide-react'
+
+import { Card, CardContent } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import { addCommentAction } from "@/app/server-actions"
+import { getCurrentUser } from "@/lib/session"
+import { sql } from "@/lib/db"
+
+type CommentRow = {
+  id: number
+  post_slug: string
+  user_id: number
+  content: string
+  created_at: string
+  user_name: string | null
+  user_email: string
+}
+
+export async function CommentSection(props: { slug: string }): Promise<JSX.Element> {
+  const slug = props.slug
+  const cookieStore = await cookies()
+  const user = await getCurrentUser(cookieStore)
+
+  let rows: CommentRow[] = []
+  let dbError = false
+  try {
+    rows = await sql<CommentRow>`
+      SELECT c.id, c.post_slug, c.user_id, c.content, c.created_at,
+             u.name as user_name, u.email as user_email
+      FROM comments c
+      JOIN users u ON u.id = c.user_id
+      WHERE c.post_slug = ${slug}
+      ORDER BY c.created_at DESC
+    `
+  } catch (_e) {
+    // Likely causes: DATABASE_URL is missing, or tables not created yet
+    dbError = true
+    rows = []
+  }
+
+  return (
+    <div className="grid gap-4">
+      {dbError && (
+        <Card>
+          <CardContent className="p-4 text-sm text-amber-700 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            <span>评论服务暂不可用，请检查数据库连接并在 /admin 完成初始化。</span>
+          </CardContent>
+        </Card>
+      )}
+
+      {user ? (
+        <Card>
+          <CardContent className="p-4">
+            <form action={addCommentAction} className="grid gap-3">
+              <input type="hidden" name="slug" value={slug} />
+              <Textarea name="content" placeholder="友善交流，欢迎分享你的看法…" required minLength={2} />
+              <div className="flex items-center justify-between">
+                <div className="text-xs text-muted-foreground">以 {user.name ?? user.email} 的身份评论</div>
+                <Button type="submit" size="sm" disabled={dbError}>
+                  <MessageSquarePlus className="h-4 w-4 mr-2" />
+                  发表评论
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <LogIn className="h-4 w-4" />
+              <span>请登录后发表评论。</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid gap-3">
+        {rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">还没有评论，快来抢沙发～</p>
+        ) : (
+          rows.map((c) => (
+            <Card key={c.id} className="border-[#30363d]/30">
+              <CardContent className="p-4">
+                <div className="text-sm font-medium">{c.user_name ?? c.user_email}</div>
+                <div className="text-xs text-muted-foreground">
+                  {format(new Date(c.created_at), "yyyy-MM-dd HH:mm", { locale: zhCN })}
+                </div>
+                <p className="mt-2 text-sm whitespace-pre-wrap">{c.content}</p>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+    </div>
+  )
+}
+
+// package.json
+{
+  "dependencies": {
+    "react-markdown": "^9.0.1",
+    "date-fns": "^3.6.0"
+    // other dependencies here
+  }
+}
