@@ -7,8 +7,9 @@
     "dev": "next dev",
     "lhci": "lhci autorun",
     "lhci:desktop": "lhci autorun --config=lighthouserc.desktop.js",
+    "lighthouse:clean": "rm -rf .lighthouseci",
     "lighthouse:serve": "npx http-server .lighthouseci -p 8080 -o",
-    "lighthouse:test": "npm run build && npm start & sleep 10 && npm run lhci && kill %1",
+    "lighthouse:test": "bash scripts/lighthouse-local.sh",
     "lint": "next lint",
     "start": "next start"
   },
