@@ -191,9 +191,18 @@ jobs:
           # 创建报告目录结构
           mkdir -p docs/lighthouse/{mobile,desktop}
 
-          # 复制报告文件
-          cp -r reports/mobile/* docs/lighthouse/mobile/ 2>/dev/null || true
-          cp -r reports/desktop/* docs/lighthouse/desktop/ 2>/dev/null || true
+          # 复制报告文件到正确位置
+          mkdir -p docs/lighthouse/mobile docs/lighthouse/desktop
+          
+          # 复制移动端报告
+          if [ -f reports/mobile/homepage-mobile.html ]; then
+            cp reports/mobile/homepage-mobile.html docs/lighthouse/mobile/index.html
+          fi
+          
+          # 复制桌面端报告  
+          if [ -f reports/desktop/homepage-desktop.html ]; then
+            cp reports/desktop/homepage-desktop.html docs/lighthouse/desktop/index.html
+          fi
 
           # 生成索引页面
           cat > docs/lighthouse/index.html << 'EOF'
@@ -246,32 +255,20 @@ jobs:
                   </div>
                   
                   <div class="meta">
-                      <p><strong>测试页面:</strong> 首页、AI文章、Agent文章、登录页、注册页</p>
-                      <p><strong>运行次数:</strong> 每页面 3 次，取中位数</p>
+                      <p><strong>测试页面:</strong> 首页</p>
+                      <p><strong>运行次数:</strong> 3 次，取中位数</p>
                       <p><strong>更新频率:</strong> 每次推送到 main 分支自动更新</p>
                   </div>
               </div>
               
               <script>
-                  // 动态加载报告列表
+                  // 加载首页报告
                   function loadReports() {
-                      const pages = ['首页', 'AI前端技术', 'Agent设计模式', '登录页', '注册页'];
                       const mobileList = document.getElementById('mobile-reports');
                       const desktopList = document.getElementById('desktop-reports');
                       
-                      mobileList.innerHTML = '';
-                      desktopList.innerHTML = '';
-                      
-                      pages.forEach((page, index) => {
-                          const mobileItem = document.createElement('li');
-                          const desktopItem = document.createElement('li');
-                          
-                          mobileItem.innerHTML = `<a href="./mobile/lhr-${index + 1}.html" target="_blank">${page}</a>`;
-                          desktopItem.innerHTML = `<a href="./desktop/lhr-${index + 1}.html" target="_blank">${page}</a>`;
-                          
-                          mobileList.appendChild(mobileItem);
-                          desktopList.appendChild(desktopItem);
-                      });
+                      mobileList.innerHTML = '<li><a href="./mobile/" target="_blank">首页性能报告</a></li>';
+                      desktopList.innerHTML = '<li><a href="./desktop/" target="_blank">首页性能报告</a></li>';
                   }
                   
                   loadReports();
