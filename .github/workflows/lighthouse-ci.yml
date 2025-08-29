@@ -36,13 +36,14 @@ jobs:
         run: npm run build
         env:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL || '' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}
 
       - name: Run Lighthouse CI (Mobile)
         run: npx lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}
 
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v4
@@ -74,13 +75,14 @@ jobs:
         run: npm run build
         env:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL || '' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}
 
       - name: Run Lighthouse CI (Desktop)
         run: npx lhci autorun --config=lighthouserc.desktop.js
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}
 
       - name: Upload Lighthouse results
         uses: actions/upload-artifact@v4

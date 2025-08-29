@@ -3,7 +3,7 @@ module.exports = {
     collect: {
       startServerCommand: "npm run start",
       startServerReadyPattern: "Ready on",
-      startServerReadyTimeout: 30000,
+      startServerReadyTimeout: 60000,
       url: [
         "http://localhost:3000",
         "http://localhost:3000/blog/ai-features-in-frontend",
