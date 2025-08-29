@@ -1,6 +1,9 @@
 module.exports = {
   ci: {
     collect: {
+      startServerCommand: "npm run start",
+      startServerReadyPattern: "Ready on",
+      startServerReadyTimeout: 60000,
       url: ["http://localhost:3000"],
       numberOfRuns: 3,
       settings: {
@@ -27,6 +30,7 @@ module.exports = {
     },
     upload: {
       target: "temporary-public-storage",
+      githubAppToken: process.env.LHCI_GITHUB_APP_TOKEN,
     },
   },
 }

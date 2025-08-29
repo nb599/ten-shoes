@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  lhci-server:
+    image: patrickhulce/lhci-server:latest
+    ports:
+      - "9001:9001"
+    environment:
+      - LHCI_STORAGE__SQL_DATABASE_PATH=/data/db.sql
+    volumes:
+      - lhci-data:/data
+    restart: unless-stopped
+
+volumes:
+  lhci-data:

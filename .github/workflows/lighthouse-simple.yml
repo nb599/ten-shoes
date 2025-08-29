@@ -34,50 +34,25 @@ jobs:
           AUTH_SECRET: lighthouse-test-secret-32-chars-long
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
-      - name: Start server and run Lighthouse
+      - name: Run Lighthouse CI (Mobile)
         run: |
-          # Start server
-          npm start &
-          SERVER_PID=$!
+          echo "Running mobile LHCI with temporary public storage..."
+          npx lhci autorun
           
-          # Wait for server
-          echo "Waiting for server..."
-          for i in {1..30}; do
-            if curl -f http://localhost:3000 >/dev/null 2>&1; then
-              echo "Server ready!"
-              break
-            fi
-            sleep 2
-          done
-          
-          # Test server accessibility
-          curl -f http://localhost:3000 || exit 1
-          
-          # Create output directory
+          # Copy results for Pages
           mkdir -p lighthouse-reports
+          cp .lighthouseci/*.html lighthouse-reports/mobile.html 2>/dev/null || echo "No mobile HTML found"
           
-          # Run Lighthouse for mobile (manual throttling)
-          echo "Running mobile Lighthouse..."
-          npx lighthouse http://localhost:3000 \
-            --output=html \
-            --output-path=lighthouse-reports/mobile.html \
-            --emulated-form-factor=mobile \
-            --throttling-method=devtools \
-            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+      - name: Run Lighthouse CI (Desktop)  
+        run: |
+          echo "Running desktop LHCI with temporary public storage..."
+          npx lhci autorun --config=lighthouserc.desktop.js
           
-          # Run Lighthouse for desktop  
-          echo "Running desktop Lighthouse..."
-          npx lighthouse http://localhost:3000 \
-            --output=html \
-            --output-path=lighthouse-reports/desktop.html \
-            --emulated-form-factor=desktop \
-            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          # Copy results for Pages
+          cp .lighthouseci/*.html lighthouse-reports/desktop.html 2>/dev/null || echo "No desktop HTML found"
           
-          # Stop server
-          kill $SERVER_PID
-          
-          # Verify files
-          ls -la lighthouse-reports/
+          # Verify all files
+          ls -la lighthouse-reports/ || mkdir -p lighthouse-reports
         env:
           AUTH_SECRET: lighthouse-test-secret-32-chars-long
           DATABASE_URL: postgresql://test:test@localhost:5432/test
