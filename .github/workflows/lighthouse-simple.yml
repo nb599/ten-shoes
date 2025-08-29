@@ -36,23 +36,39 @@ jobs:
 
       - name: Run Lighthouse CI (Mobile)
         run: |
-          echo "Running mobile LHCI with temporary public storage..."
+          echo "Running mobile LHCI..."
           npx lhci autorun
           
-          # Copy results for Pages
+          # Check and copy results
           mkdir -p lighthouse-reports
-          cp .lighthouseci/*.html lighthouse-reports/mobile.html 2>/dev/null || echo "No mobile HTML found"
+          if [ -f .lighthouseci/*.html ]; then
+            cp .lighthouseci/*.html lighthouse-reports/mobile.html
+            echo "✅ Mobile HTML report generated"
+          else
+            echo "❌ No mobile HTML generated, using direct Lighthouse"
+            npx lighthouse http://localhost:3000 --output=html --output-path=lighthouse-reports/mobile.html --emulated-form-factor=mobile --chrome-flags="--headless --no-sandbox"
+          fi
           
       - name: Run Lighthouse CI (Desktop)  
         run: |
-          echo "Running desktop LHCI with temporary public storage..."
+          echo "Running desktop LHCI..."
+          rm -rf .lighthouseci  # Clean up
           npx lhci autorun --config=lighthouserc.desktop.js
           
-          # Copy results for Pages
-          cp .lighthouseci/*.html lighthouse-reports/desktop.html 2>/dev/null || echo "No desktop HTML found"
+          # Check and copy results
+          if [ -f .lighthouseci/*.html ]; then
+            cp .lighthouseci/*.html lighthouse-reports/desktop.html
+            echo "✅ Desktop HTML report generated"  
+          else
+            echo "❌ No desktop HTML generated, using direct Lighthouse"
+            npm start &
+            sleep 10
+            npx lighthouse http://localhost:3000 --output=html --output-path=lighthouse-reports/desktop.html --preset=desktop --chrome-flags="--headless --no-sandbox"
+            pkill -f "npm start"
+          fi
           
           # Verify all files
-          ls -la lighthouse-reports/ || mkdir -p lighthouse-reports
+          ls -la lighthouse-reports/
         env:
           AUTH_SECRET: lighthouse-test-secret-32-chars-long
           DATABASE_URL: postgresql://test:test@localhost:5432/test
