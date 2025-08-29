@@ -62,10 +62,10 @@ jobs:
           mkdir -p .lighthouseci
           
           # Run Lighthouse directly to generate HTML reports
-          npx lighthouse http://localhost:3000 --output html --output-path .lighthouseci/homepage-mobile.html --preset=mobile --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          npx lighthouse http://localhost:3000 --output html --output-path .lighthouseci/lhr-1.html --preset=mobile --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
           # Also generate JSON for potential future use
-          npx lighthouse http://localhost:3000 --output json --output-path .lighthouseci/homepage-mobile.json --preset=mobile --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          npx lighthouse http://localhost:3000 --output json --output-path .lighthouseci/lhr-1.json --preset=mobile --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
           # List generated files
           ls -la .lighthouseci/
@@ -134,10 +134,10 @@ jobs:
           mkdir -p .lighthouseci
           
           # Run Lighthouse directly to generate HTML reports  
-          npx lighthouse http://localhost:3000 --output html --output-path .lighthouseci/homepage-desktop.html --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          npx lighthouse http://localhost:3000 --output html --output-path .lighthouseci/lhr-1.html --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
           # Also generate JSON for potential future use
-          npx lighthouse http://localhost:3000 --output json --output-path .lighthouseci/homepage-desktop.json --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          npx lighthouse http://localhost:3000 --output json --output-path .lighthouseci/lhr-1.json --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
           # List generated files
           ls -la .lighthouseci/
@@ -195,13 +195,13 @@ jobs:
           mkdir -p docs/lighthouse/mobile docs/lighthouse/desktop
           
           # 复制移动端报告
-          if [ -f reports/mobile/homepage-mobile.html ]; then
-            cp reports/mobile/homepage-mobile.html docs/lighthouse/mobile/index.html
+          if [ -f reports/mobile/lhr-1.html ]; then
+            cp reports/mobile/lhr-1.html docs/lighthouse/mobile/lhr-1.html
           fi
           
           # 复制桌面端报告  
-          if [ -f reports/desktop/homepage-desktop.html ]; then
-            cp reports/desktop/homepage-desktop.html docs/lighthouse/desktop/index.html
+          if [ -f reports/desktop/lhr-1.html ]; then
+            cp reports/desktop/lhr-1.html docs/lighthouse/desktop/lhr-1.html
           fi
 
           # 生成索引页面
@@ -267,8 +267,8 @@ jobs:
                       const mobileList = document.getElementById('mobile-reports');
                       const desktopList = document.getElementById('desktop-reports');
                       
-                      mobileList.innerHTML = '<li><a href="./mobile/" target="_blank">首页性能报告</a></li>';
-                      desktopList.innerHTML = '<li><a href="./desktop/" target="_blank">首页性能报告</a></li>';
+                      mobileList.innerHTML = '<li><a href="./mobile/lhr-1.html" target="_blank">首页性能报告</a></li>';
+                      desktopList.innerHTML = '<li><a href="./desktop/lhr-1.html" target="_blank">首页性能报告</a></li>';
                   }
                   
                   loadReports();
