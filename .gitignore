@@ -35,9 +35,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Lighthouse CI
+# Lighthouse CI results (but not config)
 /.lighthouseci/
 lhci_reports/
 
-# GitHub Actions
-.github/
+# Note: .github/ folder should NOT be ignored - it contains workflows
