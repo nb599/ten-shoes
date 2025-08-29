@@ -314,12 +314,14 @@ jobs:
         with:
           name: lighthouse-results-mobile
           path: ./mobile-results
+        continue-on-error: true
 
       - name: Download Desktop Results
         uses: actions/download-artifact@v4
         with:
           name: lighthouse-results-desktop
           path: ./desktop-results
+        continue-on-error: true
 
       - name: Performance Summary
         run: |
