@@ -39,7 +39,19 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}
 
       - name: Run Lighthouse CI (Mobile)
-        run: npx lhci autorun
+        run: |
+          # Start server in background with proper env vars
+          AUTH_SECRET="${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}" \
+          DATABASE_URL="${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}" \
+          npm start &
+          
+          # Wait for server to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+          
+          # Run Lighthouse CI collection only
+          npx lhci collect --numberOfRuns=3
+          npx lhci assert
+          npx lhci upload
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
@@ -78,7 +90,19 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}
 
       - name: Run Lighthouse CI (Desktop)
-        run: npx lhci autorun --config=lighthouserc.desktop.js
+        run: |
+          # Start server in background with proper env vars
+          AUTH_SECRET="${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}" \
+          DATABASE_URL="${{ secrets.DATABASE_URL || 'postgresql://lighthouse:lighthouse@localhost:5432/lighthouse' }}" \
+          npm start &
+          
+          # Wait for server to be ready
+          timeout 60 bash -c 'until curl -f http://localhost:3000 > /dev/null 2>&1; do sleep 2; done'
+          
+          # Run Lighthouse CI with desktop config
+          npx lhci collect --config=lighthouserc.desktop.js --numberOfRuns=3
+          npx lhci assert --config=lighthouserc.desktop.js
+          npx lhci upload --config=lighthouserc.desktop.js
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
           AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
