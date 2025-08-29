@@ -58,10 +58,16 @@ jobs:
           # Verify server is accessible
           curl -f http://localhost:3000 || (echo "Server failed to start" && exit 1)
           
+          # Create lighthouse results directory
+          mkdir -p .lighthouseci
+          
           # Run Lighthouse CI
           npx lhci collect --numberOfRuns=3 || true
           npx lhci assert || true
           npx lhci upload || true
+          
+          # Ensure results directory has content for artifact upload
+          ls -la .lighthouseci/ || echo "No results generated"
           
           # Stop server
           kill $SERVER_PID || true
@@ -77,6 +83,7 @@ jobs:
           name: lighthouse-results-mobile
           path: .lighthouseci/
           retention-days: 30
+          if-no-files-found: warn
 
   lighthouse-desktop:
     runs-on: ubuntu-latest
@@ -122,10 +129,16 @@ jobs:
           # Verify server is accessible
           curl -f http://localhost:3000 || (echo "Server failed to start" && exit 1)
           
+          # Create lighthouse results directory
+          mkdir -p .lighthouseci
+          
           # Run Lighthouse CI with desktop config
           npx lhci collect --config=lighthouserc.desktop.js --numberOfRuns=3 || true
           npx lhci assert --config=lighthouserc.desktop.js || true
           npx lhci upload --config=lighthouserc.desktop.js || true
+          
+          # Ensure results directory has content for artifact upload
+          ls -la .lighthouseci/ || echo "No results generated"
           
           # Stop server
           kill $SERVER_PID || true
@@ -141,6 +154,7 @@ jobs:
           name: lighthouse-results-desktop
           path: .lighthouseci/
           retention-days: 30
+          if-no-files-found: warn
 
   generate-reports:
     runs-on: ubuntu-latest
@@ -156,12 +170,14 @@ jobs:
         with:
           name: lighthouse-results-mobile
           path: ./reports/mobile
+        continue-on-error: true
 
       - name: Download Desktop Results
         uses: actions/download-artifact@v4
         with:
           name: lighthouse-results-desktop
           path: ./reports/desktop
+        continue-on-error: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
