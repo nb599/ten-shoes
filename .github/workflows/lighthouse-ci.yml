@@ -189,20 +189,34 @@ jobs:
       - name: Generate Dashboard
         run: |
           # 创建报告目录结构
-          mkdir -p docs/lighthouse/{mobile,desktop}
-
-          # 复制报告文件到正确位置
           mkdir -p docs/lighthouse/mobile docs/lighthouse/desktop
           
-          # 复制移动端报告
+          # 调试：检查下载的文件
+          echo "=== Mobile reports ==="
+          ls -la reports/mobile/ || echo "No mobile reports found"
+          echo "=== Desktop reports ==="  
+          ls -la reports/desktop/ || echo "No desktop reports found"
+          
+          # 复制报告文件到正确位置
           if [ -f reports/mobile/lhr-1.html ]; then
             cp reports/mobile/lhr-1.html docs/lighthouse/mobile/lhr-1.html
+            echo "✅ Copied mobile report"
+          else
+            echo "❌ Mobile report not found, creating placeholder"
+            echo "<h1>Mobile report not available</h1>" > docs/lighthouse/mobile/lhr-1.html
           fi
           
-          # 复制桌面端报告  
           if [ -f reports/desktop/lhr-1.html ]; then
             cp reports/desktop/lhr-1.html docs/lighthouse/desktop/lhr-1.html
+            echo "✅ Copied desktop report"
+          else
+            echo "❌ Desktop report not found, creating placeholder"
+            echo "<h1>Desktop report not available</h1>" > docs/lighthouse/desktop/lhr-1.html
           fi
+          
+          # 调试：检查最终文件
+          echo "=== Final lighthouse files ==="
+          find docs/lighthouse -name "*.html" -exec ls -la {} \;
 
           # 生成索引页面
           cat > docs/lighthouse/index.html << 'EOF'
