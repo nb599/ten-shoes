@@ -61,11 +61,23 @@ jobs:
           # Create lighthouse results directory
           mkdir -p .lighthouseci
           
-          # Run Lighthouse directly to generate HTML reports
-          npx lighthouse http://localhost:3000 --output html --output-path .lighthouseci/lhr-1.html --preset=mobile --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          # Run Lighthouse with mobile emulation (no preset, manual config)
+          npx lighthouse http://localhost:3000 \
+            --output html --output-path .lighthouseci/lhr-1.html \
+            --emulated-form-factor=mobile \
+            --throttling.rttMs=150 \
+            --throttling.throughputKbps=1638 \
+            --throttling.cpuSlowdownMultiplier=4 \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
-          # Also generate JSON for potential future use
-          npx lighthouse http://localhost:3000 --output json --output-path .lighthouseci/lhr-1.json --preset=mobile --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          # Also generate JSON
+          npx lighthouse http://localhost:3000 \
+            --output json --output-path .lighthouseci/lhr-1.json \
+            --emulated-form-factor=mobile \
+            --throttling.rttMs=150 \
+            --throttling.throughputKbps=1638 \
+            --throttling.cpuSlowdownMultiplier=4 \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
           # List generated files
           ls -la .lighthouseci/
@@ -133,11 +145,17 @@ jobs:
           # Create lighthouse results directory
           mkdir -p .lighthouseci
           
-          # Run Lighthouse directly to generate HTML reports  
-          npx lighthouse http://localhost:3000 --output html --output-path .lighthouseci/lhr-1.html --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          # Run Lighthouse with desktop settings
+          npx lighthouse http://localhost:3000 \
+            --output html --output-path .lighthouseci/lhr-1.html \
+            --preset=desktop \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
-          # Also generate JSON for potential future use
-          npx lighthouse http://localhost:3000 --output json --output-path .lighthouseci/lhr-1.json --preset=desktop --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
+          # Also generate JSON
+          npx lighthouse http://localhost:3000 \
+            --output json --output-path .lighthouseci/lhr-1.json \
+            --preset=desktop \
+            --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage"
           
           # List generated files
           ls -la .lighthouseci/
