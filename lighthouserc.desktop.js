@@ -13,7 +13,6 @@ module.exports = {
       ],
       numberOfRuns: 3,
       settings: {
-        preset: "desktop",
         throttling: {
           rttMs: 40,
           throughputKbps: 10240,

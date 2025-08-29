@@ -13,7 +13,6 @@ module.exports = {
       ],
       numberOfRuns: 3,
       settings: {
-        preset: "mobile",
         throttling: {
           rttMs: 150,
           throughputKbps: 1638.4,
