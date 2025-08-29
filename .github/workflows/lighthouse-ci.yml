@@ -61,12 +61,18 @@ jobs:
           # Create lighthouse results directory
           mkdir -p .lighthouseci
           
-          # Run Lighthouse CI
+          # Run Lighthouse CI and generate local HTML reports
           npx lhci collect --numberOfRuns=3
-          npx lhci upload
           
-          # Ensure results directory has content for artifact upload
-          ls -la .lighthouseci/ || echo "No results generated"
+          # Copy HTML reports to results directory for artifact upload
+          cp .lighthouseci/lhr-*.html .lighthouseci/ 2>/dev/null || echo "Generating HTML reports..."
+          find .lighthouseci -name "*.json" -exec sh -c 'npx lighthouse --output html --output-path "${1%.json}.html" "${1}"' _ {} \; 2>/dev/null || true
+          
+          # List generated files
+          ls -la .lighthouseci/
+          
+          # Upload to temporary storage (for links)  
+          npx lhci upload
           
           # Stop server
           kill $SERVER_PID || true
@@ -131,12 +137,18 @@ jobs:
           # Create lighthouse results directory
           mkdir -p .lighthouseci
           
-          # Run Lighthouse CI with desktop config
+          # Run Lighthouse CI with desktop config and generate local HTML reports
           npx lhci collect --config=lighthouserc.desktop.js --numberOfRuns=3
-          npx lhci upload --config=lighthouserc.desktop.js
           
-          # Ensure results directory has content for artifact upload
-          ls -la .lighthouseci/ || echo "No results generated"
+          # Copy HTML reports to results directory for artifact upload
+          cp .lighthouseci/lhr-*.html .lighthouseci/ 2>/dev/null || echo "Generating HTML reports..."
+          find .lighthouseci -name "*.json" -exec sh -c 'npx lighthouse --output html --output-path "${1%.json}.html" "${1}"' _ {} \; 2>/dev/null || true
+          
+          # List generated files
+          ls -la .lighthouseci/
+          
+          # Upload to temporary storage (for links)
+          npx lhci upload --config=lighthouserc.desktop.js
           
           # Stop server
           kill $SERVER_PID || true
