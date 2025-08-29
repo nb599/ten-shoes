@@ -61,9 +61,22 @@ jobs:
         run: |
           mkdir -p docs/lighthouse/mobile docs/lighthouse/desktop
           
-          # Copy reports to Pages structure
-          cp lighthouse-reports/mobile.html docs/lighthouse/mobile/lhr-1.html
-          cp lighthouse-reports/desktop.html docs/lighthouse/desktop/lhr-1.html
+          # Copy reports to Pages structure (with error handling)
+          if [ -f lighthouse-reports/mobile.html ]; then
+            cp lighthouse-reports/mobile.html docs/lighthouse/mobile/lhr-1.html
+            echo "✅ Mobile report copied"
+          else
+            echo "❌ Mobile report missing, creating placeholder"
+            echo "<h1>Mobile report not generated</h1><p>Check Actions logs for details.</p>" > docs/lighthouse/mobile/lhr-1.html
+          fi
+          
+          if [ -f lighthouse-reports/desktop.html ]; then
+            cp lighthouse-reports/desktop.html docs/lighthouse/desktop/lhr-1.html  
+            echo "✅ Desktop report copied"
+          else
+            echo "❌ Desktop report missing, creating placeholder"
+            echo "<h1>Desktop report not generated</h1><p>Check Actions logs for details.</p>" > docs/lighthouse/desktop/lhr-1.html
+          fi
           
           # Create main dashboard
           cat > docs/lighthouse/index.html << 'EOF'

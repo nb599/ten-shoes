@@ -32,5 +32,6 @@ module.exports = {
       target: "temporary-public-storage",
       githubAppToken: process.env.LHCI_GITHUB_APP_TOKEN,
     },
+    reporter: ['html', 'json'],
   },
 }
