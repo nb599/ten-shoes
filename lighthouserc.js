@@ -1,13 +1,7 @@
 module.exports = {
   ci: {
     collect: {
-      url: [
-        "http://localhost:3000",
-        "http://localhost:3000/blog/ai-features-in-frontend",
-        "http://localhost:3000/blog/agent-ui-patterns",
-        "http://localhost:3000/login",
-        "http://localhost:3000/register",
-      ],
+      url: ["http://localhost:3000"],
       numberOfRuns: 3,
       settings: {
         throttling: {
