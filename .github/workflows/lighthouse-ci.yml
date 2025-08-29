@@ -1,0 +1,289 @@
+name: Lighthouse CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+  checks: write
+
+jobs:
+  lighthouse-mobile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || '' }}
+
+      - name: Run Lighthouse CI (Mobile)
+        run: npx lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results-mobile
+          path: .lighthouseci/
+          retention-days: 30
+
+  lighthouse-desktop:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || '' }}
+
+      - name: Run Lighthouse CI (Desktop)
+        run: npx lhci autorun --config=lighthouserc.desktop.js
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'lighthouse-ci-test-secret-key-32-chars' }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results-desktop
+          path: .lighthouseci/
+          retention-days: 30
+
+  generate-reports:
+    runs-on: ubuntu-latest
+    needs: [lighthouse-mobile, lighthouse-desktop]
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Mobile Results
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-results-mobile
+          path: ./reports/mobile
+
+      - name: Download Desktop Results
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-results-desktop
+          path: ./reports/desktop
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate Dashboard
+        run: |
+          # 创建报告目录结构
+          mkdir -p docs/lighthouse/{mobile,desktop}
+
+          # 复制报告文件
+          cp -r reports/mobile/* docs/lighthouse/mobile/ 2>/dev/null || true
+          cp -r reports/desktop/* docs/lighthouse/desktop/ 2>/dev/null || true
+
+          # 生成索引页面
+          cat > docs/lighthouse/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="zh-CN">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>天书 - Lighthouse 性能报告</title>
+              <style>
+                  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #f6f8fa; }
+                  .container { max-width: 1200px; margin: 0 auto; }
+                  .header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                  .reports { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                  .report-section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                  .report-list { list-style: none; padding: 0; }
+                  .report-list li { margin: 10px 0; }
+                  .report-list a { color: #0366d6; text-decoration: none; padding: 8px 12px; display: block; border-radius: 4px; border: 1px solid #e1e4e8; }
+                  .report-list a:hover { background: #f6f8fa; }
+                  .meta { color: #586069; font-size: 14px; margin-top: 20px; }
+                  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+                  .badge.mobile { background: #e1f5fe; color: #01579b; }
+                  .badge.desktop { background: #f3e5f5; color: #4a148c; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header">
+                      <h1>🚀 天书 - Lighthouse 性能报告</h1>
+                      <p>自动化性能监控 • 生成时间: $(date '+%Y-%m-%d %H:%M:%S')</p>
+                      <p>提交: <code>${{ github.sha }}</code> • 分支: <code>${{ github.ref_name }}</code></p>
+                  </div>
+                  
+                  <div class="reports">
+                      <div class="report-section">
+                          <h2><span class="badge mobile">📱</span> 移动端报告</h2>
+                          <p>模拟 3G 网络环境下的移动设备性能测试</p>
+                          <ul class="report-list" id="mobile-reports">
+                              <li>正在加载报告...</li>
+                          </ul>
+                      </div>
+                      
+                      <div class="report-section">
+                          <h2><span class="badge desktop">🖥️</span> 桌面端报告</h2>
+                          <p>快速网络环境下的桌面设备性能测试</p>
+                          <ul class="report-list" id="desktop-reports">
+                              <li>正在加载报告...</li>
+                          </ul>
+                      </div>
+                  </div>
+                  
+                  <div class="meta">
+                      <p><strong>测试页面:</strong> 首页、AI文章、Agent文章、登录页、注册页</p>
+                      <p><strong>运行次数:</strong> 每页面 3 次，取中位数</p>
+                      <p><strong>更新频率:</strong> 每次推送到 main 分支自动更新</p>
+                  </div>
+              </div>
+              
+              <script>
+                  // 动态加载报告列表
+                  function loadReports() {
+                      const pages = ['首页', 'AI前端技术', 'Agent设计模式', '登录页', '注册页'];
+                      const mobileList = document.getElementById('mobile-reports');
+                      const desktopList = document.getElementById('desktop-reports');
+                      
+                      mobileList.innerHTML = '';
+                      desktopList.innerHTML = '';
+                      
+                      pages.forEach((page, index) => {
+                          const mobileItem = document.createElement('li');
+                          const desktopItem = document.createElement('li');
+                          
+                          mobileItem.innerHTML = `<a href="./mobile/lhr-${index + 1}.html" target="_blank">${page}</a>`;
+                          desktopItem.innerHTML = `<a href="./desktop/lhr-${index + 1}.html" target="_blank">${page}</a>`;
+                          
+                          mobileList.appendChild(mobileItem);
+                          desktopList.appendChild(desktopItem);
+                      });
+                  }
+                  
+                  loadReports();
+              </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/lighthouse
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  performance-summary:
+    runs-on: ubuntu-latest
+    needs: [lighthouse-mobile, lighthouse-desktop]
+    if: always()
+
+    steps:
+      - name: Download Mobile Results
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-results-mobile
+          path: ./mobile-results
+
+      - name: Download Desktop Results
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-results-desktop
+          path: ./desktop-results
+
+      - name: Performance Summary
+        run: |
+          echo "## 🚀 Lighthouse CI 性能报告" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 测试概览" >> $GITHUB_STEP_SUMMARY
+          echo "- **提交**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **分支**: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **触发**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **时间**: $(date '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📱 移动端测试" >> $GITHUB_STEP_SUMMARY
+          echo "- **网络**: 3G 模拟 (1.6 Mbps, 150ms RTT)" >> $GITHUB_STEP_SUMMARY
+          echo "- **设备**: 移动设备模拟" >> $GITHUB_STEP_SUMMARY
+          echo "- **页面**: 首页、AI文章、Agent文章、登录页、注册页" >> $GITHUB_STEP_SUMMARY
+          echo "- **运行**: 每页面 3 次，取中位数" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🖥️ 桌面端测试" >> $GITHUB_STEP_SUMMARY
+          echo "- **网络**: 快速网络 (10 Mbps, 40ms RTT)" >> $GITHUB_STEP_SUMMARY
+          echo "- **设备**: 桌面设备" >> $GITHUB_STEP_SUMMARY
+          echo "- **页面**: 首页、AI文章、Agent文章、登录页、注册页" >> $GITHUB_STEP_SUMMARY
+          echo "- **运行**: 每页面 3 次，取中位数" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 性能阈值" >> $GITHUB_STEP_SUMMARY
+          echo "| 指标 | 移动端阈值 | 桌面端阈值 | 级别 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-----------|-----------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 性能分数 | ≥70 | ≥80 | Warning |" >> $GITHUB_STEP_SUMMARY
+          echo "| 可访问性 | ≥90 | ≥95 | Error |" >> $GITHUB_STEP_SUMMARY
+          echo "| 最佳实践 | ≥80 | ≥90 | Warning |" >> $GITHUB_STEP_SUMMARY
+          echo "| SEO | ≥90 | ≥95 | Error |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📈 Core Web Vitals" >> $GITHUB_STEP_SUMMARY
+          echo "| 指标 | 移动端 | 桌面端 | 说明 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|--------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| FCP | ≤2000ms | ≤1200ms | 首次内容绘制 |" >> $GITHUB_STEP_SUMMARY
+          echo "| LCP | ≤2500ms | ≤1500ms | 最大内容绘制 |" >> $GITHUB_STEP_SUMMARY
+          echo "| CLS | ≤0.1 | ≤0.05 | 累积布局偏移 |" >> $GITHUB_STEP_SUMMARY
+          echo "| TBT | ≤300ms | ≤150ms | 总阻塞时间 |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 下载报告" >> $GITHUB_STEP_SUMMARY
+          echo "- [移动端报告构件](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [桌面端报告构件](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "- [在线报告面板](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*🤖 此报告由 Lighthouse CI 自动生成*"
