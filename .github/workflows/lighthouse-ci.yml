@@ -197,18 +197,24 @@ jobs:
           echo "=== Desktop reports ==="  
           ls -la reports/desktop/ || echo "No desktop reports found"
           
-          # 复制报告文件到正确位置
-          if [ -f reports/mobile/lhr-1.html ]; then
-            cp reports/mobile/lhr-1.html docs/lighthouse/mobile/lhr-1.html
+          # 复制报告文件到正确位置 (构件内容在子目录中)
+          if [ -f reports/mobile/.lighthouseci/lhr-1.html ]; then
+            cp reports/mobile/.lighthouseci/lhr-1.html docs/lighthouse/mobile/lhr-1.html
             echo "✅ Copied mobile report"
+          elif [ -f reports/mobile/lhr-1.html ]; then
+            cp reports/mobile/lhr-1.html docs/lighthouse/mobile/lhr-1.html
+            echo "✅ Copied mobile report (alt path)"
           else
             echo "❌ Mobile report not found, creating placeholder"
             echo "<h1>Mobile report not available</h1>" > docs/lighthouse/mobile/lhr-1.html
           fi
           
-          if [ -f reports/desktop/lhr-1.html ]; then
-            cp reports/desktop/lhr-1.html docs/lighthouse/desktop/lhr-1.html
+          if [ -f reports/desktop/.lighthouseci/lhr-1.html ]; then
+            cp reports/desktop/.lighthouseci/lhr-1.html docs/lighthouse/desktop/lhr-1.html
             echo "✅ Copied desktop report"
+          elif [ -f reports/desktop/lhr-1.html ]; then
+            cp reports/desktop/lhr-1.html docs/lighthouse/desktop/lhr-1.html
+            echo "✅ Copied desktop report (alt path)"
           else
             echo "❌ Desktop report not found, creating placeholder"
             echo "<h1>Desktop report not available</h1>" > docs/lighthouse/desktop/lhr-1.html
