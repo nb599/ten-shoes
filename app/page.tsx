@@ -47,6 +47,7 @@ export default async function HomePage() {
                   <Link
                     href={`/blog/${post.slug}`}
                     className="inline-flex items-center text-sm hover:underline whitespace-nowrap"
+                    prefetch={false}
                   >
                     阅读 <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>

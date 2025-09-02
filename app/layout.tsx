@@ -8,7 +8,16 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "天书 - Ten Shoes",
   description: "天书 (Ten Shoes) - 专注前端与 AI 的工程化落地与最佳实践",
-    generator: 'v0.app'
+  generator: 'v0.app',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: "天书 - Ten Shoes",
+    description: "专注前端与 AI 的工程化落地与最佳实践",
+    type: "website",
+  },
 }
 
 export default function RootLayout({
