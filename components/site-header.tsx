@@ -12,12 +12,12 @@ export async function SiteHeader() {
   const user = await getCurrentUser(cookieStore)
 
   return (
-    <header className="bg-[#0d1117] text-white border-b border-[#30363d] dark:bg-[#0d1117] dark:border-[#30363d]">
+    <header className="bg-[#0d1117] text-white border-b border-[#30363d]">
       <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <Sun className="h-5 w-5" />
-            <span className="font-semibold">天书</span>
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Sun className="h-5 w-5 text-[#f59e0b]" />
+            <span className="font-semibold text-[#f0f6fc]">天书</span>
           </Link>
         </div>
 
@@ -27,13 +27,13 @@ export async function SiteHeader() {
 
         <nav className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/" className="text-sm text-white/80 hover:text-white px-2">
+          <Link href="/" className="text-sm text-[#8b949e] hover:text-[#f0f6fc] px-2 transition-colors">
             主页
           </Link>
           {user ? (
             <>
               <Link href="/profile">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
+                <Button variant="ghost" size="sm" className="text-[#f0f6fc] hover:bg-[#21262d] hover:text-[#f0f6fc]">
                   <User className="h-4 w-4 mr-1" />
                   资料
                 </Button>
@@ -42,7 +42,7 @@ export async function SiteHeader() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-white/20 bg-transparent text-white hover:bg-white/20"
+                  className="border-[#30363d] bg-transparent text-[#f0f6fc] hover:bg-[#21262d] hover:border-[#f59e0b]"
                 >
                   退出
                 </Button>
@@ -51,12 +51,12 @@ export async function SiteHeader() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 hover:text-white">
+                <Button variant="ghost" size="sm" className="text-[#8b949e] hover:bg-[#21262d] hover:text-[#f0f6fc]">
                   登录
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm" className="bg-white text-[#0d1117] hover:bg-white/90">
+                <Button size="sm" className="bg-[#f59e0b] text-[#24292f] hover:bg-[#d97706] font-medium">
                   注册
                 </Button>
               </Link>

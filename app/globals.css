@@ -2,31 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 天书设计系统 - CSS 变量定义 */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-  }
+    /* 品牌色 */
+    --primary-50: #fffbeb;
+    --primary-100: #fef3c7;
+    --primary-200: #fde68a;
+    --primary-300: #fcd34d;
+    --primary-400: #fbbf24;
+    --primary-500: #f59e0b;
+    --primary-600: #d97706;
+    --primary-700: #b45309;
+    --primary-800: #92400e;
+    --primary-900: #78350f;
 
-  .dark {
+    /* 中性色 */
+    --neutral-50: #fafafa;
+    --neutral-100: #f5f5f5;
+    --neutral-200: #e5e5e5;
+    --neutral-300: #d4d4d4;
+    --neutral-400: #a3a3a3;
+    --neutral-500: #737373;
+    --neutral-600: #525252;
+    --neutral-700: #404040;
+    --neutral-800: #262626;
+    --neutral-900: #171717;
+    --neutral-950: #0a0a0a;
+
+    /* 语义色 */
+    --success-400: #4ade80;
+    --success-500: #22c55e;
+    --success-600: #16a34a;
+    --warning-400: #facc15;
+    --warning-500: #eab308;
+    --warning-600: #ca8a04;
+    --error-400: #f87171;
+    --error-500: #ef4444;
+    --error-600: #dc2626;
+    --info-400: #60a5fa;
+    --info-500: #3b82f6;
+    --info-600: #2563eb;
+
+    /* 表面色 */
+    --surface-primary: #0d1117;
+    --surface-secondary: #161b22;
+    --surface-tertiary: #21262d;
+    --surface-quaternary: #30363d;
+    --surface-overlay: #1c2128;
+
+    /* 文本色 */
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --text-tertiary: #6e7681;
+    --text-placeholder: #484f58;
+    --text-disabled: #3d444d;
+    --text-inverse: #24292f;
+
+    /* Tailwind 兼容变量 */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -46,6 +79,30 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    --radius: 0.5rem;
+  }
+
+  /* 浅色主题（保留兼容性） */
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
   }
 }
 
@@ -53,37 +110,136 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑";
+  }
+
+  /* 深色主题默认样式 */
+  html {
+    color-scheme: dark;
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--surface-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--surface-quaternary);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neutral-600);
+  }
+
+  /* 选择文本样式 */
+  ::selection {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--text-primary);
   }
 }
 
-/* 深色模式下的特殊样式 */
-.dark {
-  color-scheme: dark;
+/* Prose 样式优化 */
+@layer components {
+  .prose {
+    @apply text-[#f0f6fc] max-w-none;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    @apply text-[#f0f6fc] font-semibold;
+  }
+
+  .prose p {
+    @apply text-[#8b949e] leading-7;
+  }
+
+  .prose strong {
+    @apply text-[#f0f6fc] font-semibold;
+  }
+
+  .prose code {
+    @apply text-[#f0f6fc] bg-[#21262d] px-1.5 py-0.5 rounded text-sm;
+  }
+
+  .prose pre {
+    @apply bg-[#161b22] border border-[#30363d] rounded-lg;
+  }
+
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-[#f59e0b] bg-[#21262d] pl-4 py-2 my-4 rounded-r;
+  }
+
+  .prose a {
+    @apply text-[#58a6ff] hover:text-[#79c0ff] no-underline hover:underline;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply text-[#8b949e];
+  }
+
+  .prose li {
+    @apply my-1;
+  }
 }
 
-.dark .prose {
-  @apply text-foreground;
-}
+/* 工具类 */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 
-.dark .prose h1,
-.dark .prose h2,
-.dark .prose h3,
-.dark .prose h4,
-.dark .prose h5,
-.dark .prose h6 {
-  @apply text-foreground;
-}
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-.dark .prose strong {
-  @apply text-foreground;
-}
+  /* 设计系统工具类 */
+  .surface-primary {
+    background-color: var(--surface-primary);
+  }
 
-.dark .prose code {
-  @apply text-foreground bg-muted;
-}
+  .surface-secondary {
+    background-color: var(--surface-secondary);
+  }
 
-.dark .prose pre {
-  @apply bg-muted;
+  .surface-tertiary {
+    background-color: var(--surface-tertiary);
+  }
+
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+
+  .text-tertiary {
+    color: var(--text-tertiary);
+  }
+
+  .border-quaternary {
+    border-color: var(--surface-quaternary);
+  }
 }

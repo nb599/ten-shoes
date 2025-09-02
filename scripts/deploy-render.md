@@ -24,10 +24,10 @@
 
 ### 3. 环境变量配置
 在 Environment 部分添加：
-```
+\`\`\`
 PORT=9001
 LHCI_STORAGE__SQL_DATABASE_PATH=/data/db.sql
-```
+\`\`\`
 
 ### 4. 持久化存储
 1. 在左侧菜单点击 "Disks"
@@ -52,7 +52,7 @@ LHCI_STORAGE__SQL_DATABASE_PATH=/data/db.sql
 
 在本地运行以下命令来创建项目：
 
-```bash
+\`\`\`bash
 # 设置服务器地址
 export LHCI_SERVER_URL=https://your-render-url.onrender.com
 
@@ -64,18 +64,18 @@ npx @lhci/cli wizard
 # 2. 输入项目名称：ten-shoes
 # 3. 输入服务器 URL（已设置的环境变量）
 # 4. 保存显示的 Build Token 和 Admin Token
-```
+\`\`\`
 
 或者直接使用 API 创建：
 
-```bash
+\`\`\`bash
 # 创建项目
 curl -X POST https://your-render-url.onrender.com/v1/projects \
   -H "Content-Type: application/json" \
   -d '{"name": "ten-shoes", "externalUrl": "https://github.com/huangchongfu/ten-shoes"}'
 
 # 响应会返回 project token
-```
+\`\`\`
 
 ## GitHub Secrets 配置
 

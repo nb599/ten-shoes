@@ -12,22 +12,22 @@
    - 创建新项目 → Deploy Docker Image
    - 镜像：`patrickhulce/lhci-server:latest`
    - 环境变量：
-     ```
+     \`\`\`
      PORT=9001
      LHCI_STORAGE__SQL_DATABASE_PATH=/data/db.sql
-     ```
+     \`\`\`
    - 添加卷：`/data`
 
 3. 获取部署 URL（如：`https://your-app.railway.app`）
 
 ### 选项 B：本地测试
 
-```bash
+\`\`\`bash
 # 启动本地 LHCI Server
 docker-compose -f docker-compose.lhci.yml up -d
 
 # 服务器将在 http://localhost:9001 运行
-```
+\`\`\`
 
 ## 第二步：创建项目
 

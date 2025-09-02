@@ -14,10 +14,10 @@ Lighthouse CI Server 提供了历史报告存储和性能比较功能，可以�
 3. 创建新项目，选择 "Deploy a Docker Image"
 4. 使用镜像：`patrickhulce/lhci-server:latest`
 5. 设置环境变量：
-   ```
+   \`\`\`
    PORT=9001
    LHCI_STORAGE__SQL_DATABASE_PATH=/data/db.sql
-   ```
+   \`\`\`
 6. 添加持久化卷：挂载 `/data` 目录
 7. 获取部署 URL（如：`https://your-app.railway.app`）
 
@@ -29,7 +29,7 @@ Lighthouse CI Server 提供了历史报告存储和性能比较功能，可以�
 
 ### 选项 2: 使用 VPS 自托管
 
-```bash
+\`\`\`bash
 # 在服务器上运行
 docker-compose -f docker-compose.lhci.yml up -d
 
@@ -45,7 +45,7 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
-```
+\`\`\`
 
 ## 配置步骤
 
@@ -66,7 +66,7 @@ server {
 
 更新 `lighthouserc.desktop.js` 和 `lighthouserc.js`：
 
-```javascript
+\`\`\`javascript
 module.exports = {
   ci: {
     collect: {
@@ -80,13 +80,13 @@ module.exports = {
     // ... 其他配置
   },
 }
-```
+\`\`\`
 
 ### 4. 更新 GitHub Actions
 
 在 `.github/workflows/lighthouse-simple.yml` 中添加环境变量：
 
-```yaml
+\`\`\`yaml
 - name: Run Lighthouse CI
   run: |
     npx lhci autorun --config=lighthouserc.desktop.js
@@ -94,7 +94,7 @@ module.exports = {
     LHCI_SERVER_URL: ${{ secrets.LHCI_SERVER_URL }}
     LHCI_BUILD_TOKEN: ${{ secrets.LHCI_BUILD_TOKEN }}
     # ... 其他环境变量
-```
+\`\`\`
 
 ## 使用历史报告
 
@@ -109,7 +109,7 @@ module.exports = {
 
 在 lighthouserc 中配置基准分支：
 
-```javascript
+\`\`\`javascript
 ci: {
   assert: {
     preset: 'lighthouse:recommended',
@@ -127,17 +127,17 @@ ci: {
     },
   },
 }
-```
+\`\`\`
 
 ### 自定义报告页面
 
 可以创建自定义仪表板来展示关键指标：
 
-```javascript
+\`\`\`javascript
 // 使用 LHCI API 获取历史数据
 const response = await fetch(`${LHCI_SERVER_URL}/v1/projects/${projectId}/builds`);
 const builds = await response.json();
-```
+\`\`\`
 
 ## 故障排除
 

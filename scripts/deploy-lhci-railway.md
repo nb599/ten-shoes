@@ -22,10 +22,10 @@
 
 4. **配置环境变量**
    在 Variables 选项卡添加：
-   ```
+   \`\`\`
    PORT=9001
    LHCI_STORAGE__SQL_DATABASE_PATH=/data/db.sql
-   ```
+   \`\`\`
 
 5. **添加持久化存储**
    - 在 Settings → Volumes
