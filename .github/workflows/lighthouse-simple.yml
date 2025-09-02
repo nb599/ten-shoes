@@ -34,96 +34,42 @@ jobs:
           AUTH_SECRET: lighthouse-test-secret-32-chars-long
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
-      - name: Run Lighthouse CI (Mobile)
+      - name: Run Lighthouse CI (Desktop Only)
         run: |
-          echo "Running mobile LHCI..."
-          npx lhci autorun
-          
-          # Check and copy results
-          mkdir -p lighthouse-reports
-          if [ -f .lighthouseci/*.html ]; then
-            cp .lighthouseci/*.html lighthouse-reports/mobile.html
-            echo "✅ Mobile HTML report generated"
-          else
-            echo "❌ No mobile HTML generated, using direct Lighthouse"
-            npx lighthouse http://localhost:3000 --output=html --output-path=lighthouse-reports/mobile.html --emulated-form-factor=mobile --chrome-flags="--headless --no-sandbox"
-          fi
-          
-      - name: Run Lighthouse CI (Desktop)  
-        run: |
-          echo "Running desktop LHCI..."
-          rm -rf .lighthouseci  # Clean up
+          echo "Running desktop LHCI with historical tracking..."
           npx lhci autorun --config=lighthouserc.desktop.js
           
-          # Check and copy results
+          # Create reports directory and copy results
+          mkdir -p lighthouse-reports
           if [ -f .lighthouseci/*.html ]; then
             cp .lighthouseci/*.html lighthouse-reports/desktop.html
-            echo "✅ Desktop HTML report generated"  
+            echo "✅ Desktop HTML report generated via LHCI"
           else
-            echo "❌ No desktop HTML generated, using direct Lighthouse"
+            echo "❌ No LHCI HTML generated, using direct Lighthouse"
             npm start &
             sleep 10
             npx lighthouse http://localhost:3000 --output=html --output-path=lighthouse-reports/desktop.html --preset=desktop --chrome-flags="--headless --no-sandbox"
             pkill -f "npm start"
           fi
           
-          # Verify all files
+          # Verify files
           ls -la lighthouse-reports/
         env:
           AUTH_SECRET: lighthouse-test-secret-32-chars-long
           DATABASE_URL: postgresql://test:test@localhost:5432/test
 
-      - name: Create Pages structure
+      - name: Create Pages structure  
         run: |
-          mkdir -p docs/lighthouse/mobile docs/lighthouse/desktop
+          mkdir -p docs/lighthouse
           
-          # Copy reports to Pages structure (with error handling)
-          if [ -f lighthouse-reports/mobile.html ]; then
-            cp lighthouse-reports/mobile.html docs/lighthouse/mobile/lhr-1.html
-            echo "✅ Mobile report copied"
-          else
-            echo "❌ Mobile report missing, creating placeholder"
-            echo "<h1>Mobile report not generated</h1><p>Check Actions logs for details.</p>" > docs/lighthouse/mobile/lhr-1.html
-          fi
-          
+          # Copy desktop report to Pages root
           if [ -f lighthouse-reports/desktop.html ]; then
-            cp lighthouse-reports/desktop.html docs/lighthouse/desktop/lhr-1.html  
-            echo "✅ Desktop report copied"
+            cp lighthouse-reports/desktop.html docs/lighthouse/index.html
+            echo "✅ Desktop report copied to Pages root"
           else
             echo "❌ Desktop report missing, creating placeholder"
-            echo "<h1>Desktop report not generated</h1><p>Check Actions logs for details.</p>" > docs/lighthouse/desktop/lhr-1.html
+            echo "<h1>桌面端报告未生成</h1><p>请查看 Actions 日志了解详情。</p>" > docs/lighthouse/index.html
           fi
-          
-          # Create main dashboard
-          cat > docs/lighthouse/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-              <title>Lighthouse 性能报告</title>
-              <meta charset="UTF-8">
-              <style>
-                  body { font-family: system-ui; max-width: 800px; margin: 50px auto; padding: 20px; }
-                  .report-link { display: block; padding: 15px; margin: 10px 0; background: #f5f5f5; text-decoration: none; color: #333; border-radius: 8px; }
-                  .report-link:hover { background: #e5e5e5; }
-                  h1 { color: #333; }
-              </style>
-          </head>
-          <body>
-              <h1>🚀 Lighthouse 性能报告</h1>
-              <p>首页性能测试结果</p>
-              
-              <a href="./mobile/lhr-1.html" class="report-link">
-                  📱 移动端报告
-              </a>
-              
-              <a href="./desktop/lhr-1.html" class="report-link">
-                  🖥️ 桌面端报告
-              </a>
-              
-              <p><small>更新时间: $(date)</small></p>
-          </body>
-          </html>
-          EOF
           
           # List final structure
           find docs/lighthouse -type f
