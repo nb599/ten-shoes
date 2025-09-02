@@ -28,8 +28,13 @@ module.exports = {
         "categories:seo": ["warn", { minScore: 0.1 }],
       },
     },
-    upload: {
-      target: "temporary-public-storage", 
+    upload: process.env.LHCI_SERVER_URL ? {
+      target: 'lhci',
+      serverBaseUrl: process.env.LHCI_SERVER_URL,
+      token: process.env.LHCI_BUILD_TOKEN,
+      githubAppToken: process.env.LHCI_GITHUB_APP_TOKEN,
+    } : {
+      target: "temporary-public-storage",
       githubAppToken: process.env.LHCI_GITHUB_APP_TOKEN,
     },
     reporter: ['html', 'json'],

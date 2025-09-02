@@ -51,6 +51,17 @@ Google:
 1. **GitHub Actions**: 进入 Actions 标签查看运行结果
 2. **下载构件**: 下载 `lighthouse-results-mobile` 和 `lighthouse-results-desktop` 构件
 3. **Job Summary**: 查看 GitHub Actions 的 Summary 页面
+4. **历史报告**: 部署 LHCI Server 后可查看历史趋势和性能比较
+
+### 历史报告功能（新增）
+
+配置 Lighthouse CI Server 后可以：
+- 📊 查看历史性能趋势图表
+- 🔄 对比不同提交的性能影响
+- 💬 在 PR 中自动添加性能对比评论
+- 📈 追踪 Core Web Vitals 长期变化
+
+详细设置请参考 [快速设置指南](./docs/LIGHTHOUSE-SETUP.md)
 
 ### 测试页面
 
